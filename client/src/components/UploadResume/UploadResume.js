@@ -1,186 +1,29 @@
-import React, { useState } from "react";
-import styles from "./UploadResume.module.scss";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
-function UploadResume() {
-  const [file, setFile] = useState(null);
-  const [result, setResult] = useState(null);
+const ResumeResult = ({ resumeId }) => {
+  const [resumeData, setResumeData] = useState(null);
 
-  const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      const result = await axios.get(`/api/status/${resumeId}`);
+      setResumeData(result.data);
+    };
 
-  const handleUpload = async () => {
-    if (!file) {
-      alert("Please select a file to upload");
-      return;
-    }
+    const interval = setInterval(fetchData, 5000);
+    return () => clearInterval(interval);
+  }, [resumeId]);
 
-    const formData = new FormData();
-    formData.append("resume", file);
-
-    const response = await fetch("http://localhost:3001/upload", {
-      method: "POST",
-      body: formData,
-    });
-
-    const data = await response.json();
-    console.log(data);
-    setResult(data);
-  };
+  if (!resumeData) return <div>Loading...</div>;
 
   return (
-    <div className={styles.container}>
-      <h1>Resume Parser</h1>
-      <input type="file" onChange={handleFileChange} />
-      <button onClick={handleUpload}>Upload</button>
-
-      {result && (
-        <div className={styles.result}>
-          <h3>Parsed Resume:</h3>
-          <div className={styles.resultSection}>
-            <h4>Name:</h4>
-            <p>{result.name || "N/A"}</p>
-          </div>
-          <div className={styles.resultSection}>
-            <h4>Address:</h4>
-            <p>{result.address || "N/A"}</p>
-          </div>
-          <div className={styles.resultSection}>
-            <h4>LinkedIn:</h4>
-            <p>
-              <a
-                href={result.linkedIn}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {result.linkedIn}
-              </a>
-            </p>
-          </div>
-          <div className={styles.resultSection}>
-            <h4>GitHub:</h4>
-            <p>
-              <a href={result.github} target="_blank" rel="noopener noreferrer">
-                {result.github}
-              </a>
-            </p>
-          </div>
-          <div className={styles.resultSection}>
-            <h4>Skills:</h4>
-            <ul>
-              {result.skills.map((skill, index) => (
-                <li key={index}>{skill}</li>
-              ))}
-            </ul>
-          </div>
-          <div className={styles.resultSection}>
-            <h4>Projects:</h4>
-            {result.projects.map((project, index) => (
-              <div key={index}>
-                <strong>{project.title}</strong>
-                <p>{project.description}</p>
-                {project.link !== "N/A" && (
-                  <p>
-                    <a
-                      href={project.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {project.link}
-                    </a>
-                  </p>
-                )}
-              </div>
-            ))}
-          </div>
-          <div className={styles.resultSection}>
-            <h4>Experience:</h4>
-            {result.experience.map((exp, index) => (
-              <div key={index}>
-                <strong>{exp.title}</strong>
-                <p>{exp.description}</p>
-                {exp.link !== "N/A" && (
-                  <p>
-                    <a
-                      href={exp.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {exp.link}
-                    </a>
-                  </p>
-                )}
-              </div>
-            ))}
-          </div>
-          <div className={styles.resultSection}>
-            <h4>Education:</h4>
-            {result.education.map((edu, index) => (
-              <div key={index}>
-                <strong>{edu.title}</strong>
-                <p>{edu.description}</p>
-                {edu.link !== "N/A" && (
-                  <p>
-                    <a
-                      href={edu.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {edu.link}
-                    </a>
-                  </p>
-                )}
-              </div>
-            ))}
-          </div>
-          <div className={styles.resultSection}>
-            <h4>Achievements:</h4>
-            <ul>
-              {result.achievements.map((ach, index) => (
-                <li key={index}>{ach}</li>
-              ))}
-            </ul>
-          </div>
-          <div className={styles.resultSection}>
-            <h4>Certifications:</h4>
-            <ul>
-              {result.certifications.map((cert, index) => (
-                <li key={index}>{cert}</li>
-              ))}
-            </ul>
-          </div>
-          <div className={styles.resultSection}>
-            <h4>Publications:</h4>
-            {result.publications.map((pub, index) => (
-              <div key={index}>
-                <strong>{pub.title}</strong>
-                <p>{pub.description}</p>
-                {pub.link !== "N/A" && (
-                  <p>
-                    <a
-                      href={pub.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {pub.link}
-                    </a>
-                  </p>
-                )}
-              </div>
-            ))}
-          </div>
-          <div className={styles.resultSection}>
-            <h4>Hobbies:</h4>
-            <ul>
-              {result.hobbies.map((hobby, index) => (
-                <li key={index}>{hobby}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
+    <div>
+      <Card title="Basic Info" content={resumeData.basicInfo} />
+      {resumeData.advancedInfo && (
+        <Card title="Suggestions" content={resumeData.advancedInfo} />
       )}
     </div>
   );
-}
+};
 
-export default UploadResume;
+export default ResumeResult;
