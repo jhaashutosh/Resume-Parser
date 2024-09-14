@@ -1,4 +1,3 @@
-import logo from "./logo.svg";
 import "./App.css";
 import UploadResume from "./components/UploadResume/UploadResume";
 import styled from "styled-components";

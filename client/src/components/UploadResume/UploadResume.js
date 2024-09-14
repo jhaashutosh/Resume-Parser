@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./UploadResume.css"; // Import a CSS file for styling
+import styles from "./UploadResume.module.scss";
 
 function UploadResume() {
   const [file, setFile] = useState(null);
@@ -29,23 +29,23 @@ function UploadResume() {
   };
 
   return (
-    <div className="container">
+    <div className={styles.container}>
       <h1>Resume Parser</h1>
       <input type="file" onChange={handleFileChange} />
       <button onClick={handleUpload}>Upload</button>
 
       {result && (
-        <div className="result">
+        <div className={styles.result}>
           <h3>Parsed Resume:</h3>
-          <div className="result-section">
+          <div className={styles.resultSection}>
             <h4>Name:</h4>
             <p>{result.name || "N/A"}</p>
           </div>
-          <div className="result-section">
+          <div className={styles.resultSection}>
             <h4>Address:</h4>
             <p>{result.address || "N/A"}</p>
           </div>
-          <div className="result-section">
+          <div className={styles.resultSection}>
             <h4>LinkedIn:</h4>
             <p>
               <a
@@ -57,7 +57,7 @@ function UploadResume() {
               </a>
             </p>
           </div>
-          <div className="result-section">
+          <div className={styles.resultSection}>
             <h4>GitHub:</h4>
             <p>
               <a href={result.github} target="_blank" rel="noopener noreferrer">
@@ -65,7 +65,7 @@ function UploadResume() {
               </a>
             </p>
           </div>
-          <div className="result-section">
+          <div className={styles.resultSection}>
             <h4>Skills:</h4>
             <ul>
               {result.skills.map((skill, index) => (
@@ -73,7 +73,7 @@ function UploadResume() {
               ))}
             </ul>
           </div>
-          <div className="result-section">
+          <div className={styles.resultSection}>
             <h4>Projects:</h4>
             {result.projects.map((project, index) => (
               <div key={index}>
@@ -93,7 +93,7 @@ function UploadResume() {
               </div>
             ))}
           </div>
-          <div className="result-section">
+          <div className={styles.resultSection}>
             <h4>Experience:</h4>
             {result.experience.map((exp, index) => (
               <div key={index}>
@@ -113,7 +113,7 @@ function UploadResume() {
               </div>
             ))}
           </div>
-          <div className="result-section">
+          <div className={styles.resultSection}>
             <h4>Education:</h4>
             {result.education.map((edu, index) => (
               <div key={index}>
@@ -133,7 +133,7 @@ function UploadResume() {
               </div>
             ))}
           </div>
-          <div className="result-section">
+          <div className={styles.resultSection}>
             <h4>Achievements:</h4>
             <ul>
               {result.achievements.map((ach, index) => (
@@ -141,7 +141,7 @@ function UploadResume() {
               ))}
             </ul>
           </div>
-          <div className="result-section">
+          <div className={styles.resultSection}>
             <h4>Certifications:</h4>
             <ul>
               {result.certifications.map((cert, index) => (
@@ -149,7 +149,7 @@ function UploadResume() {
               ))}
             </ul>
           </div>
-          <div className="result-section">
+          <div className={styles.resultSection}>
             <h4>Publications:</h4>
             {result.publications.map((pub, index) => (
               <div key={index}>
@@ -169,7 +169,7 @@ function UploadResume() {
               </div>
             ))}
           </div>
-          <div className="result-section">
+          <div className={styles.resultSection}>
             <h4>Hobbies:</h4>
             <ul>
               {result.hobbies.map((hobby, index) => (
