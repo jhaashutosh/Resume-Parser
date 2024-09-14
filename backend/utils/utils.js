@@ -9,3 +9,26 @@ export const extractBasicInfo = (text) => {
     phone: (text.match(phoneRegex) || [])[1],
   };
 };
+
+export const extractRawSections = (text) => {
+  const projectsRegex = /Projects:(.*?)(Experience:|$)/s;
+  const experienceRegex = /Experience:(.*?)(Skills:|$)/s;
+
+  return {
+    rawProjects: (text.match(projectsRegex) || [])[1].trim(),
+    rawExperience: (text.match(experienceRegex) || [])[1].trim(),
+  };
+};
+
+export const extractTextFromPdf = async (pdfDoc) => {
+  let allText = "";
+  const totalPages = pdfDoc.getPageCount();
+
+  for (let i = 0; i < totalPages; i++) {
+    const page = pdfDoc.getPage(i);
+    const text = await page.getTextContent();
+    allText += text;
+  }
+
+  return allText;
+};

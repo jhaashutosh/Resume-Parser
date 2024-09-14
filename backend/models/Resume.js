@@ -1,5 +1,27 @@
 import mongoose from "mongoose";
 
+const projectSchema = new mongoose.Schema({
+  projectName: String,
+  description: String,
+  skillsUsed: [String],
+  projectLinks: [String],
+});
+
+const experienceSchema = new mongoose.Schema({
+  companyName: String,
+  duration: String,
+  startDate: Date,
+  endDate: Date,
+  description: String,
+  skillsUsed: [String],
+  achievements: [String],
+});
+
+const suggestionsSchema = new mongoose.Schema({
+  projectSuggestions: Array,
+  experienceSuggestions: Array,
+});
+
 const resumeSchema = new mongoose.Schema({
   filePath: String,
   userEmail: String,
@@ -9,17 +31,15 @@ const resumeSchema = new mongoose.Schema({
     phone: String,
     linkedin: String,
     github: String,
-    projects: Array,
-    experience: Array,
-    skills: Array,
+    skills: [String],
   },
   advancedInfo: {
-    suggestedEducation: String,
-    suggestedExperience: String,
-    suggestedProjects: Array,
+    projects: [projectSchema],
+    experience: [experienceSchema],
   },
+  suggestions: suggestionsSchema,
   status: { type: String, default: "pending" },
   createdAt: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.model("Resume", resumeSchema);
+export default mongoose.model("Resume", resumeSchema);
