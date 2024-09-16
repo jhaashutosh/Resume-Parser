@@ -34,8 +34,14 @@ const resumeSchema = new mongoose.Schema({
     skills: [String],
   },
   advancedInfo: {
-    projects: [projectSchema],
-    experience: [experienceSchema],
+    projects: {
+      type: mongoose.Schema.Types.Mixed,
+      default: "",
+    },
+    experience: {
+      type: mongoose.Schema.Types.Mixed,
+      default: "",
+    },
   },
   suggestions: suggestionsSchema,
   status: { type: String, default: "pending" },

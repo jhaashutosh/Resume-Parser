@@ -1,57 +1,73 @@
-import { GenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import dotenv from "dotenv";
 import Resume from "../models/Resume.js";
+import { connectDB } from "../db.js";
+import { generatePrompt } from "../utils/utils.js";
 
 dotenv.config();
-
-const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
-
-const generativeAI = new GenerativeAI({
-  apiKey: GOOGLE_API_KEY,
-});
 
 process.on("message", async (msg) => {
   const { resumeId } = msg;
 
+  const genAI = new GoogleGenerativeAI(process.env.API_KEY);
+
+  const model = genAI.getGenerativeModel({
+    model: "gemini-1.5-flash",
+    generationConfig: {
+      candidateCount: 1,
+      maxOutputTokens: 1500,
+      temperature: 1.0,
+    },
+  });
+
   try {
-    const resume = await Resume.findById(resumeId).lean();
+    await connectDB();
+
+    const resume = await Resume.findById(resumeId);
 
     if (!resume) {
       throw new Error("Resume not found");
     }
 
     const { advancedInfo } = resume;
-    const { projects, experience } = advancedInfo;
+    const { projects = [], experience = [] } = advancedInfo || {};
 
-    const requestPayload = {
-      projects,
-      experience,
-    };
+    const prompt = generatePrompt(projects, experience);
 
-    const response = await generativeAI.generate({
-      prompt:
-        "Extract detailed project and experience information, and provide suggestions.",
-      context: requestPayload,
-    });
+    const res = await model.generateContent(prompt);
 
-    const {
-      processedProjects,
-      processedExperience,
-      projectSuggestions,
-      experienceSuggestions,
-    } = response;
+    const result = res.response.text();
 
-    process.send({
-      resumeId,
-      advancedInfo: {
-        projects: processedProjects,
-        experience: processedExperience,
-      },
-      suggestions: {
-        projectSuggestions,
-        experienceSuggestions,
-      },
-    });
+    console.log("Result:", result);
+
+    if (result.includes("json")) {
+      const jsonString = result.substring(
+        result.indexOf("{"),
+        result.lastIndexOf("}") + 1
+      );
+      const parsedResult = JSON.parse(jsonString);
+      console.log("Parsed JSON Response:", parsedResult);
+      const {
+        processedProjects = [],
+        processedExperience = [],
+        projectSuggestions = [],
+        experienceSuggestions = [],
+      } = parsedResult;
+
+      process.send({
+        resumeId,
+        advancedInfo: {
+          projects: processedProjects,
+          experience: processedExperience,
+        },
+        suggestions: {
+          projectSuggestions,
+          experienceSuggestions,
+        },
+      });
+    } else {
+      console.error("Unexpected format or error:", result);
+    }
   } catch (error) {
     console.error("Error processing with Generative AI:", error);
     process.send({ error: error.message });

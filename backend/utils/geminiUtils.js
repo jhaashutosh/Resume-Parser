@@ -1,10 +1,10 @@
 import { fork } from "child_process";
 import Resume from "../models/Resume.js";
 
-export const processWithGemini = (resume) => {
-  const worker = fork("../workers/geminiWorker.js");
+export const processWithGemini = (resumeId) => {
+  const worker = fork("./workers/geminiWorker.js");
 
-  worker.send({ resumeId: resume._id });
+  worker.send({ resumeId });
 
   worker.on("message", async (data) => {
     const updatedResume = await Resume.findById(data.resumeId);

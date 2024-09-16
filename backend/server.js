@@ -1,4 +1,3 @@
-// server.js
 import express from "express";
 import bodyParser from "body-parser";
 import { connectDB } from "./db.js";
@@ -22,6 +21,7 @@ app.use(rateLimitingMiddleware);
 // Error handling middleware
 app.use(errorMiddleware);
 
+// Define routes with middleware
 app.use("/api/resume", resumeRoutes);
 
 const PORT = process.env.PORT || 5000;
