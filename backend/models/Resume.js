@@ -17,9 +17,19 @@ const experienceSchema = new mongoose.Schema({
   achievements: [String],
 });
 
+const educationSchema = new mongoose.Schema({
+  schoolName: String,
+  degree: String,
+  startDate: Date,
+  endDate: Date,
+  description: String,
+});
+
 const suggestionsSchema = new mongoose.Schema({
   projectSuggestions: Array,
   experienceSuggestions: Array,
+  educationSuggestions: Array,
+  achievementsSuggestions: Array,
 });
 
 const resumeSchema = new mongoose.Schema({
@@ -39,6 +49,14 @@ const resumeSchema = new mongoose.Schema({
       default: "",
     },
     experience: {
+      type: mongoose.Schema.Types.Mixed,
+      default: "",
+    },
+    education: {
+      type: mongoose.Schema.Types.Mixed,
+      default: "",
+    },
+    achievements: {
       type: mongoose.Schema.Types.Mixed,
       default: "",
     },

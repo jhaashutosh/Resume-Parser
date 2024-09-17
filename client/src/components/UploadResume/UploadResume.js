@@ -5,7 +5,8 @@ import styles from "./UploadResume.module.scss";
 
 const UploadResume = () => {
   const [file, setFile] = useState(null);
-  const [resumeId, setResumeId] = useState(null);
+  const [resumeData, setResumeData] = useState(null);
+  const [userPrompt, setUserPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -34,6 +35,7 @@ const UploadResume = () => {
 
     const formData = new FormData();
     formData.append("resume", file);
+    formData.append("userPrompt", userPrompt);
 
     try {
       const result = await axios.post(
@@ -45,7 +47,7 @@ const UploadResume = () => {
           },
         }
       );
-      setResumeId(result.data.resumeId);
+      setResumeData(result.data.data);
     } catch (err) {
       setError("Error uploading resume.");
     } finally {
@@ -56,12 +58,23 @@ const UploadResume = () => {
   return (
     <div className={styles.uploadResumeContainer}>
       <h1>Get ATS Score</h1>
-      <input type="file" accept="application/pdf" onChange={handleFileChange} />
-      <button onClick={handleUpload} disabled={loading}>
+      <input
+        placeholder="Upload Resume before clicking the button"
+        type="file"
+        accept="application/pdf"
+        onChange={handleFileChange}
+      />
+      <input
+        type="text"
+        placeholder="Enter your prompt here..."
+        value={userPrompt}
+        onChange={(e) => setUserPrompt(e.target.value)}
+      />
+      <button onClick={handleUpload} disabled={loading || !file}>
         {loading ? "Uploading..." : "Upload Resume"}
       </button>
       {error && <p className={styles.error}>{error}</p>}
-      {resumeId && <ResumeResult resumeId={resumeId} />}
+      {resumeData && !loading ? <ResumeResult resumeData={resumeData} /> : null}
     </div>
   );
 };

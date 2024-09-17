@@ -1,4 +1,4 @@
-import pdf from "pdf-parse";
+import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 import nlp from "compromise";
 import { removeStopwords } from "stopword";
 
@@ -71,18 +71,52 @@ export const extractSections = (text) => {
 
 export const extractTextFromPdf = async (fileBuffer) => {
   try {
-    const data = await pdf(fileBuffer);
-    return data.text;
+    const uint8Array = new Uint8Array(fileBuffer);
+
+    const loadingTask = getDocument({ data: uint8Array });
+    const pdfDocument = await loadingTask.promise;
+    let extractedText = "";
+
+    for (let pageNum = 1; pageNum <= pdfDocument.numPages; pageNum++) {
+      const page = await pdfDocument.getPage(pageNum);
+      const textContent = await page.getTextContent();
+
+      textContent.items.forEach((item) => {
+        extractedText += item.str + " ";
+      });
+    }
+
+    return extractedText;
   } catch (err) {
-    console.log(err);
+    console.error("Error extracting text from PDF:", err);
+    throw err;
   }
 };
 
-export const generatePrompt = (projects, experience) => {
+export const generatePrompt = (
+  userPrompt,
+  projects,
+  experience,
+  education,
+  achievements
+) => {
+  if (userPrompt !== null && userPrompt !== undefined && userPrompt !== "") {
+    const prompt =
+      `${userPrompt}` +
+      `\n\n I have extracted the following resume details for your ease: \n\n Projects: ${JSON.stringify(
+        projects
+      )}` +
+      `\n\n Experience: ${JSON.stringify(experience)}` +
+      `\n\n Education: ${JSON.stringify(education)}` +
+      `\n\n Achievements: ${JSON.stringify(achievements)}`;
+    return prompt;
+  }
   const prompt = `
       Analyze the following resume data:
       Projects: ${JSON.stringify(projects)}
       Experience: ${JSON.stringify(experience)}
+      Education: ${JSON.stringify(education)}
+      Achievements: ${JSON.stringify(achievements)}
 
       Provide the response in the following JSON format:
       {
@@ -105,11 +139,27 @@ export const generatePrompt = (projects, experience) => {
             "achievements": [String]
           }
         ],
+        "processedEducation": [
+          {
+            "schoolName": String,
+            "degree": String,
+            "startDate": Date,
+            "endDate": Date,
+            "description": String
+          }
+        ],
+        "processedAchievements": [
+          {
+            "achievement": String
+          }
+        ],
         "projectSuggestions": [],
-        "experienceSuggestions": []
+        "experienceSuggestions": [],
+        "educationSuggestions": [],
+        "achievementsSuggestions": []
       }
-      Remember to return data with maximum 300 words.
-      If there is no data for projects or experience, return empty arrays for processedProjects and processedExperience, and do not provide suggestions for those fields.
+      Remember to return data with maximum 300 words. This condition is to be followed strictly.
+      If there is no data for projects, experience, education, or achievements, return empty arrays for processedProjects, processedExperience, processedEducation, and processedAchievements, and do not provide suggestions for those fields.
     `;
   return prompt;
 };
